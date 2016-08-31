@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Weather API App</title>
+	
+	</head>
+	<body>
+	<style type="text/css">
+		
+		body {
+			font-family: Arial, sans-serif;
+			width: 80%; 
+			margin: 0 auto;
+		}
+		
+		td.temp {
+			text-align: right;
+		}
+	</style>
+		
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>	
+	<script type="text/javascript">
+		//wait until doc is ready then..
+		$(document).ready(function() {
+			
+			var url = "https://api.forecast.io/forecast/494ba7474fcda09abe182ff80f673b5c/-32.0569,115.7439?units=si";
+			
+			$.get(url, function(data){
+				console.log(data); // log the data (remove when finished)!! 
+				
+				var now = new Date(data.currently.time+1000); // create a Date object with time data from API. Change from secs to millisecs. 
+				
+				var time = $("<h1>").text("At: " + now.toDateString() + ", " + now.toTimeString() ); // convert time stamp into date
+				$("#currently").append(time); // add to #currently div
+				
+				var h = $("<h1>").text("Currently: " +  data.currently.summary );
+				$("#currently").append(h); // add to #currently div
+				
+								
+				var t = $("<h1>").html("Temp: " +  data.currently.temperature + "&deg;C" );
+				$("#currently").append(t); // add to #currently div
+				
+				// forecast data
+				// loop though data
+				
+				for (var i = 0; i < data.daily.data.length; i++) { 
+			    	var f = data.daily.data[i]; //the data for one day of forecast in variable (f)
+					// create a table row					
+					var row = $("<tr>");
+					var date = new Date(f.time+1000); // get the forecast data time and convert to date
+					row.append("<td>" + date.toDateString() + "</td>");
+					row.append("<td>" + f.summary + "</td>");
+					row.append("<td class='temp'>" + Math.round(f.temperatureMin) + "&deg;C</td>");
+					row.append("<td class='temp'>" + Math.round(f.temperatureMax) + "&deg;C</td>");
+					
+					// add td with f info
+					// append the tr to the table
+					$("#forecast").append(row);
+					
+			    
+			};
+				
+			});
+		});
+	
+	</script>
+	
+	<div id="currently"></div><!--End currently div-->
+		<table id="forecast">
+			<tr>
+				<th>Date</th>
+				<th>Summary</th>
+				<th>Min</th>
+				<th>Max</th>
+			</tr>
+			
+			
+		</table>
+
+
+	</body>
+</html>
