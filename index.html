@@ -20,7 +20,22 @@
 		.tempbar {
 			background-color: lightblue;
 			width: 100px;
-			height: 10px;
+			height: 18px;
+			position: relative;
+		}
+		
+		.mintemp, .maxtemp {
+			color: #fff;
+			position: absolute;
+			margin: 0 5px;
+		}
+		
+		.mintemp {
+			left: 0;
+		}
+		
+		.maxtemp {
+			right: 0;
 		}
 	</style>
 		
@@ -29,13 +44,13 @@
 	<script type="text/javascript">
 		//wait until doc is ready then..
 		$(document).ready(function() {
-			
+		
 			var url = "https://api.forecast.io/forecast/494ba7474fcda09abe182ff80f673b5c/-32.0569,115.7439?units=si";
 			
 			$.get(url, function(data){
 				console.log(data); // log the data (remove when finished)!! 
 				
-				var now = new Date(data.currently.time+1000); // create a Date object with time data from API. Change from secs to millisecs. 
+				var now = new Date(data.currently.time*1000); // create a Date object with time data from API. Change from secs to millisecs. 
 				
 				var time = $("<h1>").text("At: " + now.toDateString() + ", " + now.toTimeString() ); // convert time stamp into date
 				$("#currently").append(time); // add to #currently div
@@ -50,19 +65,44 @@
 				// forecast data
 				// loop though data
 				
+				var days = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
+				
 				for (var i = 0; i < data.daily.data.length; i++) { 
 			    	var f = data.daily.data[i]; //the data for one day of forecast in variable (f)
 					// create a table row					
 					var row = $("<tr>");
-					var date = new Date(f.time+1000); // get the forecast data time and convert to date
+					var date = new Date(f.time*1000); // get the forecast data time and convert to date
+					
+				
+					if (i === 0) { //if it's today
+							row.append("<td>Today</td>");
+						} else if ( i === 1 ) { //if it's tomorrow
+							row.append("<td>Tomorrow</td>");
+						} else {
+							row.append("<td>" + days[date.getDay()] + "</td>"); // say what day it is
+						}
+					
+					
+					
 					row.append("<td>" + date.toDateString() + "</td>");
 					row.append("<td>" + f.summary + "</td>");
 					
 					var temprange = $("<td class='temprange'>");
-					var tempbar = $("<div class='tempbar'>");
 					
-					temprange.append(tempbar);
-					row.append(temprange);
+					var tempbar = $("<div class='tempbar'>");
+					tempbar.append("<span class='mintemp'>" + Math.round(f.temperatureMin) +"</span>");//create span and min temp inside
+					tempbar.append("<span class='maxtemp'>" + Math.round(f.temperatureMax) +"</span>");//create span and maxtemp inside
+					
+					var tempstart = -5; //start value of temp scale
+					var tempscale = 20; //20px per degree
+					var mintemp = Math.round(f.temperatureMin); // store min temp
+					var maxtemp = Math.round(f.temperatureMax); // store max temp
+					
+					tempbar.css("left", (mintemp - tempstart)*tempscale + "px"); //use css to set visual
+					tempbar.css("width", (maxtemp - mintemp)*tempscale + "px");
+					
+					temprange.append(tempbar); // put bar inside table cell
+					row.append(temprange); //put table cell inside row
 										
 					// add td with f info
 					// append the tr to the table

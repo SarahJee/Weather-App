@@ -1,0 +1,119 @@
+<html>
+	<head>
+		<title>Forecast.io Demo</title>
+	</head>
+	<body>
+		<style type="text/css">
+			body{
+				font-family: Arial, sans-serif;
+				width:60%;
+				margin: 0 auto;
+			}
+
+			td.temp{
+				text-align: right;
+			}
+
+			.tempbar{
+				background-color:orange;
+				width:80px;
+				height:18px;
+				position:relative;
+				background: linear-gradient(to right, #88f0fc 0%,#f7c785 100%);
+			}
+
+			.mintemp, .maxtemp{
+				color:black;
+				position:absolute;
+				margin: 0 2px;
+			}
+
+			.mintemp{
+				left:0;
+			}
+
+			.maxtemp{
+				right:0;
+			}
+
+		</style>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function(){
+
+				var url = "https://api.forecast.io/forecast/6694d76ea87566aa0f18d9362ba6fb18/-35.2760,149.1344?units=si";
+
+				$.get(url, function(data){
+
+					var now = new Date(data.currently.time*1000); 
+					// create a Date object, with data from the API
+
+					var time = $("<h1>").text("At: " + now.toDateString() + ", " + now.toTimeString() );
+					$("#currently").append(time); // stick it to the body
+
+					var h = $("<h1>").text("Currently: " + data.currently.summary );	
+					$("#currently").append(h); // stick it to the body
+
+					var t = $("<h2>").html("Temp: " + data.currently.temperature + "&deg;C" );
+					$("#currently").append(t); // stick it to the body
+
+					// forecast data?
+					// loop through the data
+
+					var days = ["Sun","Mon","Tues","Wed","Thurs","Fri","Sat"];
+
+					for (var i = 0; i < data.daily.data.length; i++) {
+						var f = data.daily.data[i]; // the data for one day in the forecast
+						// first create a tr 
+						var row = $("<tr>");
+						var date = new Date(f.time*1000); // get the forecast data time and convert it to a JS date
+
+						if (i == 0){ // today
+							row.append("<td>Today</td>");
+						} else if (i == 1){ // tomorrow
+							row.append("<td>Tomorrow</td>");
+						} else {
+							row.append("<td>" + days[date.getDay()] + "</td>");
+						}
+						
+						row.append("<td>" + f.summary + "</td>");
+						
+						var temprange = $("<td class='temprange'>");
+
+						var tempbar = $("<div class='tempbar'>");
+						tempbar.append("<span class='mintemp'>" + Math.round(f.temperatureMin) +"</span>");
+						tempbar.append("<span class='maxtemp'>" + Math.round(f.temperatureMax) +"</span>");
+
+						var tempstart = -5; // start value of the temperature scale
+						var tempscale = 10; // 10 pixels per degree
+						var mintemp = Math.round(f.temperatureMin);
+						var maxtemp = Math.round(f.temperatureMax);
+
+						tempbar.css("left", (mintemp - tempstart)*tempscale + "px");
+						tempbar.css("width", (maxtemp - mintemp)*tempscale + "px");
+
+						temprange.append(tempbar);
+						row.append(temprange);
+
+						// append the tr to the table
+						$("#forecast").append(row);
+
+					};
+
+
+
+				});
+			});
+
+		</script>
+
+		<div id="currently"></div>
+
+		<table id="forecast">
+			<tr><th>date</th><th>summary</th></tr>
+
+
+		</table>
+
+	</body>
+</html>
